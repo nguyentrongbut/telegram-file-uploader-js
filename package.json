@@ -1,0 +1,27 @@
+{
+  "name": "telegram-file-uploader",
+  "version": "1.0.0",
+  "description": "Upload images, videos, audio files, or documents to Telegram via bot and get a public link (if available).",
+  "main": "src/index.js",
+  "author": "Nguyen Trong But",
+  "license": "MIT",
+  "keywords": [
+    "telegram",
+    "upload",
+    "bot",
+    "file",
+    "image",
+    "video",
+    "audio",
+    "document",
+    "telegram-uploader"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nguyentrongbut/telegram-file-uploader"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "form-data": "^4.0.0"
+  }
+}
