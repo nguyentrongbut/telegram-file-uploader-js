@@ -2,6 +2,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
+const { getFileUrl } = require('./getFileUrl');
 
 /**
  * Upload a file to Telegram (image, video, audio, or document).
@@ -42,9 +43,7 @@ async function uploadToTelegram(filePath, mimeType, botToken, chatId) {
             fileId = result[typeField].file_id;
         }
 
-        const publicUrl = chatId.startsWith('@')
-            ? `https://t.me/${chatId.replace('@', '')}/${messageId}`
-            : null;
+        const publicUrl = fileId ? await getFileUrl(fileId, botToken) : null;
 
         return {
             success: true,
