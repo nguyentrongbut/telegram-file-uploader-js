@@ -17,5 +17,5 @@ async function getFileUrl(fileId, botToken) {
 }
 
 module.exports = {
-    getFileUrl,
+    getFileUrl
 };

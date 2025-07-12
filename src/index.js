@@ -5,11 +5,16 @@ const path = require('path');
 const { getFileUrl } = require('./getFileUrl');
 
 /**
- * Upload a file to Telegram (image, video, audio, or document).
+ * Upload a single file to Telegram.
+ * @param {string} filePath - Local file path.
+ * @param {string} mimeType - MIME type (e.g., image/png, video/mp4).
+ * @param {string} botToken - Telegram Bot Token.
+ * @param {string} chatId - Target chat ID (e.g. @channel or -100xxxxx).
+ * @returns {Promise<Object>} Upload result.
  */
 async function uploadToTelegram(filePath, mimeType, botToken, chatId) {
     if (!fs.existsSync(filePath)) {
-        throw new Error('File path does not exist.');
+        throw new Error(`File not found: ${filePath}`);
     }
 
     if (!botToken || !chatId || !mimeType) {
@@ -29,26 +34,20 @@ async function uploadToTelegram(filePath, mimeType, botToken, chatId) {
     form.append('chat_id', chatId);
 
     try {
-        const response = await axios.post(apiUrl, form, {
-            headers: form.getHeaders(),
-        });
-
+        const response = await axios.post(apiUrl, form, { headers: form.getHeaders() });
         const result = response.data.result;
-        const messageId = result.message_id;
 
-        let fileId = null;
-        if (Array.isArray(result[typeField])) {
-            fileId = result[typeField].at(-1)?.file_id || null;
-        } else if (result[typeField]?.file_id) {
-            fileId = result[typeField].file_id;
-        }
+        const fileInfo = result[typeField];
+        const fileId = Array.isArray(fileInfo)
+            ? fileInfo.at(-1)?.file_id
+            : fileInfo?.file_id || null;
 
         const publicUrl = fileId ? await getFileUrl(fileId, botToken) : null;
 
         return {
             success: true,
             file_id: fileId,
-            message_id: messageId,
+            message_id: result.message_id,
             public_url: publicUrl,
         };
     } catch (error) {
@@ -59,6 +58,33 @@ async function uploadToTelegram(filePath, mimeType, botToken, chatId) {
     }
 }
 
+/**
+ * Upload multiple files to Telegram sequentially.
+ * @param {Array<{filePath: string, mimeType: string}>} files
+ * @param {string} botToken
+ * @param {string} chatId
+ * @param {number} delayMs
+ * @returns {Promise<Array>} Array of upload results
+ */
+async function uploadMultipleFiles(files, botToken, chatId, delayMs = 1000) {
+    const results = [];
+
+    for (const { filePath, mimeType } of files) {
+        try {
+            const res = await uploadToTelegram(filePath, mimeType, botToken, chatId);
+            results.push(res);
+        } catch (err) {
+            results.push({ success: false, error: err.message });
+        }
+
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+
+    return results;
+}
+
 module.exports = {
     uploadToTelegram,
+    uploadMultipleFiles,
+    getFileUrl,
 };

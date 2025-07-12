@@ -1,8 +1,9 @@
 # 📤 telegram-file-uploader-js
 
-A simple Node.js utility to upload **images**, **videos**, **audio**, or **documents** to Telegram via bot, and retrieve direct file links.
+A lightweight Node.js utility to upload **images**, **videos**, **audio**, or **documents** to Telegram via bot and
+retrieve direct CDN file links.
 
-> ⚡ Ideal for developers who want to use Telegram as a free file hosting (CDN-like).
+> ⚡ Ideal for developers who want to use Telegram as a free media hosting service (CDN-like).
 
 ---
 
@@ -16,68 +17,59 @@ npm install telegram-file-uploader-js
 
 ## 🚀 Usage
 
-Upload a file
+### Upload a single file
 
-```bash
+``` bash
 const { uploadToTelegram } = require('telegram-file-uploader-js');
 
-(async () => {
-  const result = await uploadToTelegram(
-    './media/sample.mp3',             // Local file path
-    'audio/mpeg',                     // MIME type
-    'YOUR_BOT_TOKEN',                 // From @BotFather
-    '@your_channel_or_-100xxxxxxx'   // Public channel (@username) or private group ID
-  );
+const botToken = 'YOUR_BOT_TOKEN'; // From @BotFather
+const chatId = '@your_channel_or_-100xxxxxxx'; // Public channel or private group ID
 
-  console.log('📤 Upload result:', result);
-})();
-
+uploadToTelegram('./public/image.jpg', 'image/jpeg', botToken, chatId)
+.then(console.log)
+.catch(console.error);
 ```
 
-Example result
+### Upload multiple files
+
+```bash
+const { uploadMultipleFiles } = require('telegram-file-uploader-js');
+
+const files = [
+  { filePath: './public/image.jpg', mimeType: 'image/jpeg' },
+  { filePath: './public/video.mp4', mimeType: 'video/mp4' },
+];
+
+uploadMultipleFiles(files, botToken, chatId)
+  .then(console.log)
+  .catch(console.error);
+```
+
+### Example result
 
 ```bash
 {
   "success": true,
   "file_id": "BAACAgUAAx...",
   "message_id": 7,
-  "public_url": "https://t.me/YourChannel/7"
+  "public_url": "https://api.telegram.org/file/bot<YOUR_BOT_TOKEN>/file_path.ext"
 }
-```
-
-Get direct file URL
-
-```bash
-const { getFileUrl } = require('telegram-file-uploader-js');
-
-(async () => {
-  const directUrl = await getFileUrl(
-    'BAACAgUAAx...',   // file_id
-    'YOUR_BOT_TOKEN'
-  );
-
-  console.log('✅ Direct file URL:', directUrl);
-})();
-```
-
-Output example:
-
-```bash
-✅ Direct file URL: https://api.telegram.org/file/bot<YOUR_BOT_TOKEN>/music/file_2.mp3
 ```
 
 ---
 
 ## 📚 API Reference
-### `uploadToTelegram(filePath, mimeType, botToken, chatId)`
-| Param      | Type   | Description                                    |
-| ---------- | ------ | ---------------------------------------------- |
-| `filePath` | string | Local file path                                |
-| `mimeType` | string | File MIME type (e.g. `image/png`, `video/mp4`) |
-| `botToken` | string | Telegram bot token from @BotFather             |
-| `chatId`   | string | `@channel` or `-100xxxxxx` private group ID    |
 
-Returns
+### `uploadToTelegram(filePath, mimeType, botToken, chatId)`
+
+| Parameter  | Type     | Description                                    |
+|------------|----------|------------------------------------------------|
+| `filePath` | `string` | Local file path                                |
+| `mimeType` | `string` | MIME type of the file (e.g., `image/png`)      |
+| `botToken` | `string` | Telegram bot token (from @BotFather)           |
+| `chatId`   | `string` | Target `@channel` username or private group ID |
+
+#### Returns:
 
 ```bash
 {
@@ -88,16 +80,32 @@ Returns
 }
 ```
 
-### `getFileUrl(fileId, botToken)`
-| Param      | Type   | Description                  |
-| ---------- | ------ | ---------------------------- |
-| `fileId`   | string | File ID returned from upload |
-| `botToken` | string | Telegram bot token           |
+### `uploadMultipleFiles(files, botToken, chatId, delayMs?)`
 
-Returns
+Uploads an array of files sequentially with optional delay (default: `1000ms`).
+
+| Parameter  | Type                            | Description                                   |
+|------------|---------------------------------|-----------------------------------------------|
+| `files`    | `Array<{ filePath, mimeType }>` | List of files to upload                       |
+| `botToken` | `string`                        | Telegram bot token                            |
+| `chatId`   | `string`                        | Channel username or private group ID          |
+| `delayMs`  | `number` (optional)             | Delay between uploads in ms (default: `1000`) |
+
+#### Returns:
+
+Array of individual upload results (same format as `uploadToTelegram`).
+
+### `getFileUrl(fileId, botToken)`
+
+| Parameter  | Type     | Description                      |
+|------------|----------|----------------------------------|
+| `fileId`   | `string` | `file_id` returned from Telegram |
+| `botToken` | `string` | Telegram bot token               |
+
+#### Returns:
 
 ```bash
-  string // Telegram CDN direct link
+string // Telegram CDN direct link
 ```
 
 ---
@@ -105,7 +113,7 @@ Returns
 ## 🧱 Supported MIME Types
 
 | File Type | MIME Type Examples                       |
-| --------- | ---------------------------------------- |
+|-----------|------------------------------------------|
 | Image     | `image/jpeg`, `image/png`                |
 | Video     | `video/mp4`, `video/quicktime`           |
 | Audio     | `audio/mpeg`, `audio/wav`                |
@@ -115,15 +123,16 @@ Returns
 
 ## 🔐 Security Notes
 
-- Do NOT expose your bot token to the frontend/browser.
+- Never expose your bot token on the frontend or client-side apps.
 
-- public_url is only available for public channels (not private groups).
+- public_url only works for public channels.
 
-- For private groups, use getFileUrl() and host the result via proxy or direct link.
+- For private groups, use getFileUrl() and serve files via your own proxy/CDN.
 
 ---
 
 ## ⚙️ Telegram Setup Guide
+
 1. Create a bot via: Use [@BotFather](https://t.me/botfather).
 2. Add the bot to your group or channel.
 3. Make sure the bot is admin (to send media).
@@ -137,4 +146,5 @@ Returns
     - Look for `chat.id` in the response.
 
 ## 🪪 License
+
 MIT © nguyentrongbut
