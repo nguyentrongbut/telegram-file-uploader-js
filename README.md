@@ -1,4 +1,4 @@
-# 📤 telegram-file-uploader
+# 📤 telegram-file-uploader-js
 
 A simple Node.js utility to upload **images**, **videos**, **audio**, or **documents** to Telegram via bot, and retrieve direct file links.
 
@@ -9,7 +9,7 @@ A simple Node.js utility to upload **images**, **videos**, **audio**, or **docum
 ## 📦 Installation
 
 ```bash
-npm install telegram-file-uploader
+npm install telegram-file-uploader-js
 ```
 
 ---
@@ -19,7 +19,7 @@ npm install telegram-file-uploader
 Upload a file
 
 ```bash
-const { uploadToTelegram } = require('telegram-file-uploader');
+const { uploadToTelegram } = require('telegram-file-uploader-js');
 
 (async () => {
   const result = await uploadToTelegram(
@@ -48,7 +48,7 @@ Example result
 Get direct file URL
 
 ```bash
-const { getFileUrl } = require('telegram-file-uploader');
+const { getFileUrl } = require('telegram-file-uploader-js');
 
 (async () => {
   const directUrl = await getFileUrl(
